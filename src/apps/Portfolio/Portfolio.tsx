@@ -206,6 +206,12 @@ const desiredYAxisTickCount = 8
 
 const purchaseHistory: PurchaseGroup[] = [
   {
+    month: '2026 年 6 月',
+    entries: [
+      { date: '2026/06/05', shares: '1.26686', price: '$157.081880' },
+    ],
+  },
+  {
     month: '2026 年 5 月',
     entries: [
       { date: '2026/05/26', shares: '1.26458', price: '$157.364439' },
@@ -431,12 +437,15 @@ export const Portfolio = () => {
         Math.max(hoveredPoint.x - tooltipWidth / 2, 8),
         chartRight - tooltipWidth + 8,
       )
-      const top = hoveredPoint.y - tooltipHeight - tooltipMargin
+      const proposedTop = hoveredPoint.y - tooltipHeight - tooltipMargin
+      const shouldPlaceBelow = proposedTop < chartTop
+      const top = shouldPlaceBelow ? hoveredPoint.y + tooltipMargin : proposedTop
 
       return {
         left,
         top,
         arrowOffset: hoveredPoint.x - left,
+        arrowBaseY: shouldPlaceBelow ? top : top + tooltipHeight,
       }
     })()
     : null
@@ -587,7 +596,7 @@ export const Portfolio = () => {
                   stroke="rgba(140, 46, 46, 0.18)"
                 />
                 <path
-                  d={`M ${hoveredPoint.x} ${hoveredPoint.y} L ${tooltipPosition.left + tooltipPosition.arrowOffset - tooltipArrowHalfWidth} ${tooltipPosition.top + tooltipHeight} L ${tooltipPosition.left + tooltipPosition.arrowOffset + tooltipArrowHalfWidth} ${tooltipPosition.top + tooltipHeight} Z`}
+                  d={`M ${hoveredPoint.x} ${hoveredPoint.y} L ${tooltipPosition.left + tooltipPosition.arrowOffset - tooltipArrowHalfWidth} ${tooltipPosition.arrowBaseY} L ${tooltipPosition.left + tooltipPosition.arrowOffset + tooltipArrowHalfWidth} ${tooltipPosition.arrowBaseY} Z`}
                   fill="rgba(253, 252, 248, 0.97)"
                   stroke="rgba(140, 46, 46, 0.18)"
                   strokeLinejoin="round"
