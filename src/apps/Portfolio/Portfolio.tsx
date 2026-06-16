@@ -1,6 +1,7 @@
 import { Fragment, useEffect, useRef, useState } from 'react'
 import { FiArrowUpRight, FiChevronLeft, FiChevronRight, FiTrendingUp } from 'react-icons/fi'
 import styled, { keyframes } from 'styled-components'
+import { purchaseHistory } from './purchaseHistory'
 import { TradingViewOverview } from './TradingViewOverview'
 import { TradingViewQuote } from './TradingViewQuote'
 
@@ -32,18 +33,7 @@ type MonthLabel = {
   label: string
 }
 
-type PurchaseEntry = {
-  date: string
-  shares: string
-  price: string
-}
-
-type PurchaseGroup = {
-  month: string
-  entries: PurchaseEntry[]
-}
-
-type ParsedPurchaseEntry = {
+type ParsedPurchaseRecord = {
   id: string
   date: string
   shares: number
@@ -127,6 +117,13 @@ const currencyFormatter = new Intl.NumberFormat('en-US', {
   maximumFractionDigits: 2,
 })
 
+const purchasePriceFormatter = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD',
+  minimumFractionDigits: 6,
+  maximumFractionDigits: 6,
+})
+
 const sharesFormatter = new Intl.NumberFormat('en-US', {
   minimumFractionDigits: 5,
   maximumFractionDigits: 5,
@@ -143,8 +140,6 @@ const percentFormatter = new Intl.NumberFormat('en-US', {
   maximumFractionDigits: 2,
 })
 
-const parseCurrency = (value: string) => Number(value.replace('$', ''))
-
 const describeDeltaFromAverage = (delta: number) => {
   if (Math.abs(delta) < 0.005) {
     return '與平均成本幾乎持平'
@@ -153,11 +148,6 @@ const describeDeltaFromAverage = (delta: number) => {
   const formattedDelta = `${percentFormatter.format(Math.abs(delta))}%`
 
   return delta > 0 ? `比平均成本高 ${formattedDelta}` : `比平均成本低 ${formattedDelta}`
-}
-
-const parseDate = (value: string) => {
-  const [year, month, day] = value.split('/').map(Number)
-  return new Date(year, month - 1, day)
 }
 
 const createMonthName = (month: number) =>
@@ -172,6 +162,13 @@ const createMonthKey = (date: Date) => {
 }
 
 const createMonthLabel = (date: Date) => `${date.getFullYear()} 年 ${date.getMonth() + 1} 月`
+
+const formatPurchaseDate = (date: Date) => {
+  const year = date.getFullYear()
+  const month = `${date.getMonth() + 1}`.padStart(2, '0')
+  const day = `${date.getDate()}`.padStart(2, '0')
+  return `${year}/${month}/${day}`
+}
 
 const getNiceStep = (value: number) => {
   if (!Number.isFinite(value) || value <= 0) {
@@ -204,82 +201,25 @@ const chartWidth = chartRight - chartLeft
 const chartHeight = chartBottom - chartTop
 const desiredYAxisTickCount = 8
 
-const purchaseHistory: PurchaseGroup[] = [
-  {
-    month: '2026 年 6 月',
-    entries: [
-      { date: '2026/06/15', shares: '1.24651', price: '$158.843797' },
-      { date: '2026/06/05', shares: '1.26686', price: '$157.081880' },
-    ],
-  },
-  {
-    month: '2026 年 5 月',
-    entries: [
-      { date: '2026/05/26', shares: '1.26458', price: '$157.364439' },
-      { date: '2026/05/15', shares: '1.29062', price: '$154.189952' },
-      { date: '2026/05/05', shares: '1.30426', price: '$151.810010' },
-    ],
-  },
-  {
-    month: '2026 年 4 月',
-    entries: [
-      { date: '2026/04/27', shares: '1.32279', price: '$150.439605' },
-      { date: '2026/04/15', shares: '1.33730', price: '$148.059644' },
-      { date: '2026/04/06', shares: '1.40090', price: '$139.910013' },
-    ],
-  },
-  {
-    month: '2026 年 3 月',
-    entries: [
-      { date: '2026/03/27', shares: '1.00000', price: '$135.360000' },
-      { date: '2026/03/25', shares: '1.40247', price: '$139.753241' },
-      { date: '2026/03/20', shares: '1.00000', price: '$137.410000' },
-      { date: '2026/03/16', shares: '1.38741', price: '$141.270487' },
-      { date: '2026/03/09', shares: '1.00000', price: '$139.750000' },
-      { date: '2026/03/06', shares: '1.00000', price: '$142.430000' },
-      { date: '2026/03/05', shares: '1.37359', price: '$144.147559' },
-      { date: '2026/03/03', shares: '1.00000', price: '$142.910000' },
-    ],
-  },
-  {
-    month: '2026 年 2 月',
-    entries: [
-      { date: '2026/02/25', shares: '1.21921', price: '$148.457253' },
-      { date: '2026/02/17', shares: '1.24151', price: '$145.790000' },
-      { date: '2026/02/09', shares: '1.22803', price: '$146.575899' },
-    ],
-  },
-  {
-    month: '2026 年 1 月',
-    entries: [
-      { date: '2026/01/30', shares: '1.00000', price: '$146.130000' },
-      { date: '2026/01/14', shares: '1.00000', price: '$144.570000' },
-      { date: '2026/01/08', shares: '1.00000', price: '$143.420000' },
-      { date: '2026/01/05', shares: '1.00000', price: '$142.835000' },
-    ],
-  },
-]
+const purchaseEntries: ParsedPurchaseRecord[] = purchaseHistory.map((purchaseRecord, recordIndex) => {
+  const date = purchaseRecord.date
+  const dateLabel = formatPurchaseDate(date)
+  const monthKey = createMonthKey(date)
 
-const purchaseEntries: ParsedPurchaseEntry[] = purchaseHistory.flatMap(({ entries }, groupIndex) =>
-  entries.map((entry, entryIndex) => {
-    const date = parseDate(entry.date)
-    const monthKey = createMonthKey(date)
-
-    return {
-      id: `${monthKey}-${entry.date}-${entry.shares}-${entry.price}-${groupIndex}-${entryIndex}`,
-      date: entry.date,
-      shares: Number(entry.shares),
-      price: parseCurrency(entry.price),
-      timestamp: date.getTime(),
-      month: date.getMonth() + 1,
-      monthKey,
-      monthLabel: createMonthLabel(date),
-      sharesLabel: entry.shares,
-      priceLabel: entry.price,
-      investedLabel: currencyFormatter.format(Number(entry.shares) * parseCurrency(entry.price)),
-    }
-  }),
-)
+  return {
+    id: `${monthKey}-${dateLabel}-${purchaseRecord.shares}-${purchaseRecord.price}-${recordIndex}`,
+    date: dateLabel,
+    shares: purchaseRecord.shares,
+    price: purchaseRecord.price,
+    timestamp: date.getTime(),
+    month: date.getMonth() + 1,
+    monthKey,
+    monthLabel: createMonthLabel(date),
+    sharesLabel: sharesFormatter.format(purchaseRecord.shares),
+    priceLabel: purchasePriceFormatter.format(purchaseRecord.price),
+    investedLabel: currencyFormatter.format(purchaseRecord.shares * purchaseRecord.price),
+  }
+})
 
 const chartEntries = [...purchaseEntries].sort((left, right) => left.timestamp - right.timestamp)
 
