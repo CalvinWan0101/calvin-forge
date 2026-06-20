@@ -1,8 +1,8 @@
 import { createBrowserRouter, createRoutesFromElements, Route } from 'react-router-dom'
 import App from '../App'
+import { NotFound } from '../apps/ErrorPage'
 import { Home } from '../apps/Home'
 import { Portfolio } from '../apps/Portfolio'
-import { NotFound } from '../apps/layout/errorPage'
 
 export const PageRouter = createBrowserRouter(
   createRoutesFromElements(

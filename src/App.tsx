@@ -1,4 +1,4 @@
-import { Layout } from './apps/layout/Layout'
+import { Layout } from './apps/Layout'
 import styled, { createGlobalStyle } from 'styled-components'
 
 function App() {

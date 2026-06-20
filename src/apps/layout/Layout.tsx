@@ -1,9 +1,9 @@
 import { Outlet } from 'react-router-dom'
 import styled from 'styled-components'
-import { AnalyticsTracker } from './analytics'
-import { BackgroundAudio } from './audio'
-import { Footer } from './footer'
-import { Navbar } from './navbar'
+import { AnalyticsTracker } from './components/AnalyticsTracker'
+import { BackgroundAudio } from './components/BackgroundAudio'
+import { Footer } from './components/Footer'
+import { Navbar } from './components/Navbar'
 
 export const Layout = () => {
   return (
