@@ -1,12 +1,12 @@
 import type { IconType } from 'react-icons'
 import styled from 'styled-components'
 
-type HomeSectionHeaderProps = {
+type HeaderProps = {
   icon: IconType
   title: string
 }
 
-export const HomeSectionHeader = ({ icon: Icon, title }: HomeSectionHeaderProps) => (
+export const Header = ({ icon: Icon, title }: HeaderProps) => (
   <SectionHeader>
     <SectionIcon>
       <Icon />

@@ -1,11 +1,11 @@
 import { FiBookOpen } from 'react-icons/fi'
 import styled, { keyframes } from 'styled-components'
-import { education } from '../../data/data'
-import { HomeSectionHeader } from './HomeSectionHeader'
+import { education } from '../../../data/data'
+import { Header } from './Header'
 
-export const EducationSection = () => (
+export const Education = () => (
   <Section id="education">
-    <HomeSectionHeader icon={FiBookOpen} title="教育背景" />
+    <Header icon={FiBookOpen} title="教育背景" />
 
     <Timeline>
       {education.map((entry) => (

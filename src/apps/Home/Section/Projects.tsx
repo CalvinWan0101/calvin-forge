@@ -1,11 +1,11 @@
 import { FiArrowRight, FiExternalLink, FiFolder, FiImage, FiMonitor } from 'react-icons/fi'
 import styled, { keyframes } from 'styled-components'
-import { projects } from '../../data/data'
-import { HomeSectionHeader } from './HomeSectionHeader'
+import { projects } from '../../../data/data'
+import { Header } from './Header'
 
-export const ProjectsSection = () => (
+export const Projects = () => (
   <Section id="projects">
-    <HomeSectionHeader icon={FiMonitor} title="我的專案" />
+    <Header icon={FiMonitor} title="我的專案" />
 
     <ProjectsList>
       {projects.map((project) => {

@@ -1,11 +1,11 @@
 import { FiArrowRight, FiMessageSquare } from 'react-icons/fi'
 import styled, { keyframes } from 'styled-components'
-import { contactMethods } from '../../data/data'
-import { HomeSectionHeader } from './HomeSectionHeader'
+import { contactMethods } from '../../../data/data'
+import { Header } from './Header'
 
-export const ContactSection = () => (
+export const Contact = () => (
   <Section id="contact">
-    <HomeSectionHeader icon={FiMessageSquare} title="保持聯繫" />
+    <Header icon={FiMessageSquare} title="保持聯繫" />
 
     <SectionIntro>歡迎透過以下方式與我聯繫，無論是工作機會、技術交流，或只是打個招呼。</SectionIntro>
 

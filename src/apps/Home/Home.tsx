@@ -1,19 +1,19 @@
-import { ContactSection } from './ContactSection'
-import { EducationSection } from './EducationSection'
-import { ExperienceSection } from './ExperienceSection'
-import { Hero } from './Hero'
-import { ProjectsSection } from './ProjectsSection'
-import { SkillsSection } from './SkillsSection'
+import { Contact } from './Section/Contact'
+import { Education } from './Section/Education'
+import { Experience } from './Section/Experience'
+import { Hero } from './Section/Hero'
+import { Projects } from './Section/Projects'
+import { Skills } from './Section/Skills'
 import styled from 'styled-components'
 
 export const Home = () => (
   <Main>
     <Hero />
-    <SkillsSection />
-    <ExperienceSection />
-    <EducationSection />
-    <ProjectsSection />
-    <ContactSection />
+    <Skills />
+    <Experience />
+    <Education />
+    <Projects />
+    <Contact />
   </Main>
 )
 

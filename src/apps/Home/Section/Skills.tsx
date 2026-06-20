@@ -1,11 +1,11 @@
 import { FiCode } from 'react-icons/fi'
 import styled, { keyframes } from 'styled-components'
-import { skills } from '../../data/data'
-import { HomeSectionHeader } from './HomeSectionHeader'
+import { skills } from '../../../data/data'
+import { Header } from './Header'
 
-export const SkillsSection = () => (
+export const Skills = () => (
   <Section id="skills">
-    <HomeSectionHeader icon={FiCode} title="技藝專長" />
+    <Header icon={FiCode} title="技藝專長" />
 
     <SkillsGrid>
       {skills.map((skill) => {

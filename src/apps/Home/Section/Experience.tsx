@@ -1,11 +1,11 @@
 import { FiBriefcase } from 'react-icons/fi'
 import styled, { keyframes } from 'styled-components'
-import { experiences } from '../../data/data'
-import { HomeSectionHeader } from './HomeSectionHeader'
+import { experiences } from '../../../data/data'
+import { Header } from './Header'
 
-export const ExperienceSection = () => (
+export const Experience = () => (
   <Section id="experience">
-    <HomeSectionHeader icon={FiBriefcase} title="過往經歷" />
+    <Header icon={FiBriefcase} title="過往經歷" />
 
     <Timeline>
       {experiences.map((entry) => (

@@ -1,6 +1,6 @@
 import { FiMapPin, FiUser } from 'react-icons/fi'
 import styled, { keyframes } from 'styled-components'
-import { profile, seal } from '../../data/data'
+import { profile, seal } from '../../../data/data'
 
 export const Hero = () => (
   <HeroSection id="home">
