@@ -2,7 +2,6 @@ import { Fragment, useEffect, useRef, useState } from 'react'
 import { FiArrowUpRight, FiChevronLeft, FiChevronRight, FiTrendingUp } from 'react-icons/fi'
 import styled, { keyframes } from 'styled-components'
 import { purchaseHistory } from '../../data/data'
-import { TradingViewOverview } from './TradingViewOverview'
 import { TradingViewQuote } from './TradingViewQuote'
 
 type SummaryCardItem = {
@@ -425,12 +424,6 @@ export const Portfolio = () => {
           </SummaryCard>
         ))}
       </CardsGrid>
-      <WidgetCard>
-        <CardTitleRow>
-          <SectionTitle>即時走勢</SectionTitle>
-        </CardTitleRow>
-        <TradingViewOverview />
-      </WidgetCard>
       <ChartCard>
         <CardTitleRow>
           <SectionTitle>購入單價走勢</SectionTitle>
