@@ -1,7 +1,7 @@
 import { Fragment, useEffect, useRef, useState } from 'react'
 import { FiArrowUpRight, FiChevronLeft, FiChevronRight, FiTrendingUp } from 'react-icons/fi'
 import styled, { keyframes } from 'styled-components'
-import { purchaseHistory } from './purchaseHistory'
+import { purchaseHistory } from '../../data/data'
 import { TradingViewOverview } from './TradingViewOverview'
 import { TradingViewQuote } from './TradingViewQuote'
 
@@ -1126,15 +1126,15 @@ const PaginationControls = styled.div`
   }
 `
 
-const PaginationButton = styled.button<{ $active?: boolean }>`
+const PaginationButton = styled.button`
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.3rem;
   padding: 0.45rem 0.75rem;
-  border: 1px solid ${({ $active }) => ($active ? 'var(--accent)' : 'rgba(140, 46, 46, 0.18)')};
-  background: ${({ $active }) => ($active ? 'rgba(140, 46, 46, 0.12)' : 'rgba(253, 252, 248, 0.92)')};
-  color: ${({ $active }) => ($active ? 'var(--accent)' : 'var(--text)')};
+  border: 1px solid rgba(140, 46, 46, 0.18);
+  background: rgba(253, 252, 248, 0.92);
+  color: var(--text);
   font: inherit;
   font-size: 0.8rem;
   font-weight: 700;

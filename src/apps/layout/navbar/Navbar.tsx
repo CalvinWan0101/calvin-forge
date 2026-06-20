@@ -4,9 +4,7 @@ import styled from 'styled-components'
 
 const navigation = [
   { href: '/', label: '首頁' },
-  { href: '/projects', label: '專案' },
   { href: '/portfolio', label: '投資' },
-  { href: '/contact', label: '聯繫' },
 ]
 
 const logo = new URL('../../../assets/logo.PNG', import.meta.url).href
@@ -43,20 +41,14 @@ const NavbarContent = () => {
         </MenuButton>
         <Nav id="mobile-navigation" $isOpen={isMenuOpen}>
           {navigation.map((item) => (
-            item.href.startsWith('/') ? (
-              <NavRouteLink
-                key={item.href}
-                to={item.href}
-                end={item.href === '/'}
-                onClick={() => setIsMenuOpen(false)}
-              >
-                {item.label}
-              </NavRouteLink>
-            ) : (
-              <NavAnchor key={item.href} href={item.href} onClick={() => setIsMenuOpen(false)}>
-                {item.label}
-              </NavAnchor>
-            )
+            <NavRouteLink
+              key={item.href}
+              to={item.href}
+              end={item.href === '/'}
+              onClick={() => setIsMenuOpen(false)}
+            >
+              {item.label}
+            </NavRouteLink>
           ))}
         </Nav>
       </NavInner>
@@ -264,9 +256,5 @@ const linkStyles = `
 `
 
 const NavRouteLink = styled(RouterNavLink)`
-  ${linkStyles}
-`
-
-const NavAnchor = styled.a`
   ${linkStyles}
 `
