@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { FiChevronLeft, FiChevronRight } from 'react-icons/fi'
+import { useEffect, useRef, useState } from 'react'
+import { FiChevronDown, FiChevronLeft, FiChevronRight } from 'react-icons/fi'
 import styled from 'styled-components'
 import { historyMonthOptions, purchaseEntries } from '../portfolioModel'
 import { SectionTitle, SurfaceCard } from './shared'
@@ -11,6 +11,8 @@ const allMonthsLabel = '全部月份'
 export const PurchaseHistory = () => {
   const [selectedMonth, setSelectedMonth] = useState(allMonthsValue)
   const [currentHistoryPage, setCurrentHistoryPage] = useState(1)
+  const [isMonthMenuOpen, setIsMonthMenuOpen] = useState(false)
+  const monthMenuRef = useRef<HTMLDivElement>(null)
 
   const filteredHistoryEntries = purchaseEntries.filter((entry) =>
     selectedMonth === 'all' ? true : entry.monthKey === selectedMonth,
@@ -25,28 +27,71 @@ export const PurchaseHistory = () => {
       ? allMonthsLabel
       : historyMonthOptions.find((option) => option.value === selectedMonth)?.label ?? allMonthsLabel
 
+  useEffect(() => {
+    if (!isMonthMenuOpen) {
+      return
+    }
+
+    const handlePointerDown = (event: PointerEvent) => {
+      if (!monthMenuRef.current?.contains(event.target as Node)) {
+        setIsMonthMenuOpen(false)
+      }
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsMonthMenuOpen(false)
+      }
+    }
+
+    document.addEventListener('pointerdown', handlePointerDown)
+    document.addEventListener('keydown', handleKeyDown)
+
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown)
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [isMonthMenuOpen])
+
+  const monthOptions = historyMonthOptions
+
   return (
     <HistoryCard>
       <HistoryHeader>
         <SectionTitle>購入紀錄</SectionTitle>
-        <SelectWrap>
-          <MonthSelect
-            id="portfolio-history-month"
+        <MonthDropdown ref={monthMenuRef}>
+          <MonthDropdownButton
+            type="button"
             aria-label="月份篩選"
-            value={selectedMonth}
-            onChange={(event) => {
-              setSelectedMonth(event.target.value)
-              setCurrentHistoryPage(1)
-            }}
+            aria-haspopup="listbox"
+            aria-expanded={isMonthMenuOpen}
+            aria-controls="portfolio-history-month-menu"
+            onClick={() => setIsMonthMenuOpen((open) => !open)}
           >
-            <option value={allMonthsValue}>{allMonthsLabel}</option>
-            {historyMonthOptions.map((option) => (
-              <option key={option.value} value={option.value}>
+            {selectedMonthLabel}
+            <MonthDropdownIcon aria-hidden="true" $isOpen={isMonthMenuOpen}>
+              <FiChevronDown />
+            </MonthDropdownIcon>
+          </MonthDropdownButton>
+          <MonthMenu id="portfolio-history-month-menu" role="listbox" $isOpen={isMonthMenuOpen}>
+            {monthOptions.map((option) => (
+              <MonthOption
+                key={option.value}
+                type="button"
+                role="option"
+                aria-selected={selectedMonth === option.value}
+                $isActive={selectedMonth === option.value}
+                onClick={() => {
+                  setSelectedMonth(option.value)
+                  setCurrentHistoryPage(1)
+                  setIsMonthMenuOpen(false)
+                }}
+              >
                 {option.label}
-              </option>
+              </MonthOption>
             ))}
-          </MonthSelect>
-        </SelectWrap>
+          </MonthMenu>
+        </MonthDropdown>
       </HistoryHeader>
 
       <TableScroll>
@@ -110,7 +155,7 @@ export const PurchaseHistory = () => {
 }
 
 const HistoryCard = styled(SurfaceCard)`
-  overflow: hidden;
+  overflow: visible;
   animation-delay: 0.24s;
 `
 
@@ -121,35 +166,35 @@ const HistoryHeader = styled.div`
   gap: 1rem;
   padding: 1rem 1.5rem;
   border-bottom: 1px solid var(--border-soft);
-`
-
-const SelectWrap = styled.div`
-  position: relative;
-  display: inline-flex;
 
   @media (max-width: 720px) {
-    flex: 1;
-    min-width: 0;
-  }
-  &::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    right: 1rem;
-    width: 0.35rem;
-    height: 0.35rem;
-    border-right: 1.5px solid currentColor;
-    border-bottom: 1.5px solid currentColor;
-    pointer-events: none;
-    transform: translateY(-70%) rotate(45deg);
+    align-items: center;
+    padding: 1rem;
   }
 `
 
-const MonthSelect = styled.select`
-  appearance: none;
+const MonthDropdown = styled.div`
+  position: relative;
   display: inline-flex;
+  justify-content: flex-end;
+  width: 8.5rem;
+  flex-shrink: 0;
+
+  @media (max-width: 720px) {
+    width: 8.5rem;
+    max-width: 100%;
+    align-self: flex-end;
+  }
+`
+
+const MonthDropdownButton = styled.button`
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem;
+  width: 100%;
   min-height: 2.25rem;
-  padding: 0.45rem 2rem 0.45rem 1rem;
+  padding: 0.45rem 0.75rem 0.45rem 1rem;
   border: 1px solid rgba(23, 30, 28, 0.14);
   border-radius: 999px;
   background: rgba(244, 241, 225, 0.98);
@@ -157,13 +202,75 @@ const MonthSelect = styled.select`
   font: inherit;
   font-size: 0.875rem;
   font-weight: 700;
+  white-space: nowrap;
   cursor: pointer;
   transition: background 0.2s ease, color 0.2s ease;
 
   @media (max-width: 720px) {
-    width: 100%;
     min-width: 0;
   }
+
+  &:hover {
+    background: rgba(180, 99, 62, 0.12);
+    color: var(--accent);
+  }
+`
+
+const MonthDropdownIcon = styled.span<{ $isOpen: boolean }>`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  transform: ${({ $isOpen }) => ($isOpen ? 'rotate(180deg)' : 'rotate(0deg)')};
+  transition: transform 0.2s ease;
+`
+
+const MonthMenu = styled.div<{ $isOpen: boolean }>`
+  position: absolute;
+  top: calc(100% + 0.75rem);
+  right: 0;
+  z-index: 5;
+  box-sizing: border-box;
+  width: 100%;
+  max-height: 16rem;
+  overflow-y: auto;
+  scrollbar-width: none;
+  padding: 0.65rem;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.25rem;
+  border: 1px solid rgba(23, 30, 28, 0.14);
+  border-radius: 1.25rem;
+  background: rgba(244, 241, 225, 0.98);
+  box-shadow: 0 1rem 2.5rem rgba(23, 30, 28, 0.12);
+  opacity: ${({ $isOpen }) => ($isOpen ? 1 : 0)};
+  transform: ${({ $isOpen }) => ($isOpen ? 'translateY(0)' : 'translateY(-0.5rem)')};
+  pointer-events: ${({ $isOpen }) => ($isOpen ? 'auto' : 'none')};
+  transition: opacity 0.2s ease, transform 0.2s ease;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+`
+
+const MonthOption = styled.button<{ $isActive: boolean }>`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  align-self: stretch;
+  padding: 0.5rem 0.75rem;
+  border: 0;
+  border-radius: 999px;
+  background: ${({ $isActive }) => ($isActive ? 'rgba(180, 99, 62, 0.12)' : 'transparent')};
+  color: ${({ $isActive }) => ($isActive ? 'var(--accent)' : 'inherit')};
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
 
   &:hover {
     background: rgba(180, 99, 62, 0.12);
