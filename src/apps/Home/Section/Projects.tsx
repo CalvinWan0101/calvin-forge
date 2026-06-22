@@ -1,31 +1,109 @@
-import { FiArrowRight, FiExternalLink, FiFolder, FiImage, FiMonitor } from 'react-icons/fi'
+import { useRef, useState } from 'react'
+import {
+  FiArrowRight,
+  FiChevronLeft,
+  FiChevronRight,
+  FiExternalLink,
+  FiFolder,
+  FiImage,
+  FiMonitor,
+} from 'react-icons/fi'
 import styled, { keyframes } from 'styled-components'
 import { projects } from '../../../data/data'
 import { Header } from './Header'
 
-export const Projects = () => (
-  <Section id="projects">
-    <Header icon={FiMonitor} title="我的專案" />
+export const Projects = () => {
+  const [activeProjectIndex, setActiveProjectIndex] = useState(0)
+  const [slideDirection, setSlideDirection] = useState<'previous' | 'next'>('next')
+  const touchStartX = useRef<number | null>(null)
+  const activeProject = projects[activeProjectIndex]
+  const HostIcon = activeProject.hostIcon
 
-    <ProjectsList>
-      {projects.map((project) => {
-        const HostIcon = project.hostIcon
+  const showPreviousProject = () => {
+    setSlideDirection('previous')
+    setActiveProjectIndex((currentIndex) => (
+      currentIndex === 0 ? projects.length - 1 : currentIndex - 1
+    ))
+  }
 
-        return (
+  const showNextProject = () => {
+    setSlideDirection('next')
+    setActiveProjectIndex((currentIndex) => (
+      currentIndex === projects.length - 1 ? 0 : currentIndex + 1
+    ))
+  }
+
+  const showProject = (projectIndex: number) => {
+    if (projectIndex === activeProjectIndex) {
+      return
+    }
+
+    setSlideDirection(projectIndex > activeProjectIndex ? 'next' : 'previous')
+    setActiveProjectIndex(projectIndex)
+  }
+
+  const handleTouchStart = (event: React.TouchEvent<HTMLDivElement>) => {
+    touchStartX.current = event.touches[0]?.clientX ?? null
+  }
+
+  const handleTouchEnd = (event: React.TouchEvent<HTMLDivElement>) => {
+    if (touchStartX.current === null) {
+      return
+    }
+
+    const touchEndX = event.changedTouches[0]?.clientX
+    if (touchEndX === undefined) {
+      touchStartX.current = null
+      return
+    }
+
+    const swipeDistance = touchEndX - touchStartX.current
+    touchStartX.current = null
+
+    if (Math.abs(swipeDistance) < 50) {
+      return
+    }
+
+    if (swipeDistance > 0) {
+      showPreviousProject()
+      return
+    }
+
+    showNextProject()
+  }
+
+  return (
+    <Section id="projects">
+      <Header icon={FiMonitor} title="我的專案" />
+
+      <ProjectsCarousel aria-roledescription="carousel" aria-label="專案展示">
+        <CarouselButton
+          type="button"
+          onClick={showPreviousProject}
+          aria-label="上一個專案"
+        >
+          <FiChevronLeft />
+        </CarouselButton>
+
+        <CarouselViewport
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+        >
           <ProjectCard
-            key={project.name}
-            href={project.href}
+            key={activeProject.name}
+            $direction={slideDirection}
+            href={activeProject.href}
             target="_blank"
             rel="noreferrer"
-            aria-label={`前往 ${project.name}`}
+            aria-label={`前往 ${activeProject.name}`}
           >
             <ProjectMedia>
-              {project.desktopImageUrl ? (
+              {activeProject.desktopImageUrl ? (
                 <ProjectPicture>
-                  {project.mobileImageUrl ? (
-                    <source media="(max-width: 720px)" srcSet={project.mobileImageUrl} />
-                  ) : null}
-                  <ProjectImage src={project.desktopImageUrl} alt={project.imageAlt ?? project.name} />
+                  <ProjectImage
+                    src={activeProject.desktopImageUrl}
+                    alt={activeProject.imageAlt ?? activeProject.name}
+                  />
                 </ProjectPicture>
               ) : (
                 <ProjectPlaceholder>
@@ -34,7 +112,7 @@ export const Projects = () => (
                   </PlaceholderIcon>
                   <PlaceholderLabel>
                     <FiFolder />
-                    {project.name}
+                    {activeProject.name}
                   </PlaceholderLabel>
                 </ProjectPlaceholder>
               )}
@@ -46,18 +124,18 @@ export const Projects = () => (
 
             <ProjectBody>
               <ProjectTop>
-                <ProjectName>{project.name}</ProjectName>
+                <ProjectName>{activeProject.name}</ProjectName>
                 <ProjectHost>
                   <HostIcon />
-                  {project.host}
+                  {activeProject.host}
                 </ProjectHost>
               </ProjectTop>
 
-              <ProjectDescription>{project.description}</ProjectDescription>
+              <ProjectDescription>{activeProject.description}</ProjectDescription>
 
               <ProjectFooter>
                 <ProjectTags>
-                  {project.tags.map((tag) => (
+                  {activeProject.tags.map((tag) => (
                     <ProjectTag key={tag}>{tag}</ProjectTag>
                   ))}
                 </ProjectTags>
@@ -69,11 +147,32 @@ export const Projects = () => (
               </ProjectFooter>
             </ProjectBody>
           </ProjectCard>
-        )
-      })}
-    </ProjectsList>
-  </Section>
-)
+
+          <ProjectDots aria-label="選擇專案">
+            {projects.map((project, index) => (
+              <ProjectDot
+                key={project.name}
+                type="button"
+                $active={index === activeProjectIndex}
+                onClick={() => showProject(index)}
+                aria-label={`顯示 ${project.name}`}
+                aria-current={index === activeProjectIndex}
+              />
+            ))}
+          </ProjectDots>
+        </CarouselViewport>
+
+        <CarouselButton
+          type="button"
+          onClick={showNextProject}
+          aria-label="下一個專案"
+        >
+          <FiChevronRight />
+        </CarouselButton>
+      </ProjectsCarousel>
+    </Section>
+  )
+}
 
 const fadeUp = keyframes`
   from {
@@ -87,25 +186,103 @@ const fadeUp = keyframes`
   }
 `
 
+const slideFromPrevious = keyframes`
+  from {
+    opacity: 0;
+    transform: translateX(-48px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+`
+
+const slideFromNext = keyframes`
+  from {
+    opacity: 0;
+    transform: translateX(48px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+`
+
 const Section = styled.section`
   scroll-margin-top: 5.5rem;
   animation: ${fadeUp} 0.7s ease both;
 `
 
-const ProjectsList = styled.div`
+const ProjectsCarousel = styled.div`
   display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
+  align-items: center;
+  gap: 1rem;
+
+  @media (max-width: 720px) {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
 `
 
-const ProjectCard = styled.a`
+const CarouselViewport = styled.div`
+  position: relative;
+  flex: 1;
+  min-width: 0;
+
+  @media (max-width: 720px) {
+    grid-column: 1 / -1;
+  }
+`
+
+const CarouselButton = styled.button`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 3rem;
+  height: 3rem;
+  border: 1px solid rgba(140, 46, 46, 0.2);
+  border-radius: 999px;
+  background: rgba(253, 252, 248, 0.92);
+  color: var(--accent);
+  cursor: pointer;
+  font-size: 1.4rem;
+  box-shadow: 0 14px 28px rgba(62, 50, 44, 0.08);
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+
+  &:hover {
+    border-color: rgba(140, 46, 46, 0.5);
+    box-shadow: 0 18px 34px rgba(62, 50, 44, 0.12);
+    transform: translateY(-2px);
+  }
+
+  &:focus-visible {
+    outline: 3px solid rgba(140, 46, 46, 0.18);
+    outline-offset: 3px;
+  }
+
+  @media (max-width: 720px) {
+    display: none;
+  }
+`
+
+const ProjectCard = styled.a<{ $direction: 'previous' | 'next' }>`
   position: relative;
   display: flex;
   overflow: hidden;
+  min-height: 320px;
   border: 2px solid var(--border-soft);
   border-radius: 2px;
   background: linear-gradient(180deg, rgba(253, 252, 248, 0.96), rgba(250, 246, 236, 0.96));
   box-shadow: 0 20px 40px rgba(62, 50, 44, 0.08);
+  animation: ${({ $direction }) => (
+    $direction === 'previous' ? slideFromPrevious : slideFromNext
+  )} 0.32s ease both;
   transition:
     transform 0.25s ease,
     border-color 0.25s ease,
@@ -141,8 +318,9 @@ const ProjectCard = styled.a`
 
 const ProjectMedia = styled.div`
   position: relative;
+  align-self: flex-start;
   flex-shrink: 0;
-  width: 280px;
+  width: 320px;
   aspect-ratio: 1 / 1;
   border-right: 1px solid var(--border-soft);
   background:
@@ -151,7 +329,7 @@ const ProjectMedia = styled.div`
 
   @media (max-width: 720px) {
     width: 100%;
-    aspect-ratio: 2 / 1;
+    aspect-ratio: 1 / 1;
     border-right: 0;
     border-bottom: 1px solid var(--border-soft);
   }
@@ -167,7 +345,8 @@ const ProjectImage = styled.img`
   display: block;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  object-position: center;
   opacity: 0.92;
   transition:
     transform 0.3s ease,
@@ -317,4 +496,28 @@ const ProjectLinkHint = styled.span`
   font-weight: 700;
   letter-spacing: 0.08em;
   white-space: nowrap;
+`
+
+const ProjectDots = styled.div`
+  display: flex;
+  justify-content: center;
+  gap: 0.55rem;
+  margin-top: 1rem;
+`
+
+const ProjectDot = styled.button<{ $active: boolean }>`
+  width: ${({ $active }) => ($active ? '1.6rem' : '0.55rem')};
+  height: 0.55rem;
+  border: 0;
+  border-radius: 999px;
+  background: ${({ $active }) => ($active ? 'var(--accent)' : 'rgba(140, 46, 46, 0.22)')};
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    width 0.2s ease;
+
+  &:focus-visible {
+    outline: 3px solid rgba(140, 46, 46, 0.18);
+    outline-offset: 3px;
+  }
 `
