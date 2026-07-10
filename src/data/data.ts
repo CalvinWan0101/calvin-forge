@@ -195,6 +195,7 @@ export const contactMethods: ContactMethod[] = [
 ]
 
 export const purchaseHistory: PurchaseRecord[] = [
+  { date: createPurchaseDate(2026, 7, 6), shares: 1.24508, price: 157.42 },
   { date: createPurchaseDate(2026, 6, 25), shares: 1.26323, price: 155.949747 },
   { date: createPurchaseDate(2026, 6, 15), shares: 1.24651, price: 158.843797 },
   { date: createPurchaseDate(2026, 6, 5), shares: 1.26686, price: 157.08188 },
