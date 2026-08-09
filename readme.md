@@ -3,7 +3,7 @@
 # Calvin Forge
 
 Calvin Forge is a personal portfolio website built with React, TypeScript, and Vite.
-It presents my background, projects, portfolio records, and contact information in a single site.
+It presents my background, projects, and contact information in a single site.
 
 ## Tech Stack
 
@@ -17,5 +17,4 @@ It presents my background, projects, portfolio records, and contact information 
 
 - Home: profile, skills, experience, and education
 - Projects: selected GitHub projects with cover images and language statistics
-- Portfolio: personal investment records and charts
 - Contact: social links and contact details

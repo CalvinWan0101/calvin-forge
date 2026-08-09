@@ -43,9 +43,3 @@ export type ContactMethod = {
   href: string
   icon: IconType
 }
-
-export type PurchaseRecord = {
-  date: Date
-  shares: number
-  price: number
-}

@@ -4,7 +4,6 @@ import styled from 'styled-components'
 
 const navigation = [
   { href: '/', label: '首頁' },
-  { href: '/portfolio', label: '投資' },
 ]
 
 const logo = new URL('../../../assets/logo.PNG', import.meta.url).href
